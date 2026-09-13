@@ -14,7 +14,7 @@ env:
 
 jobs:
   # ============================================================================
-  # BUILD DEBUG APK (always on push — no dependency on lint/test)
+  # BUILD DEBUG APK
   # ============================================================================
   build-debug:
     name: Build Debug APK
@@ -30,11 +30,13 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'temurin'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x ./gradlew
+      - name: Generate Gradle Wrapper
+        run: |
+          if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
+            echo "gradle-wrapper.jar not found, generating it..."
+            gradle wrapper --gradle-version 8.4
+          fi
+          chmod +x ./gradlew
 
       - name: Build Debug APK
         run: ./gradlew assembleDebug --no-daemon
@@ -47,7 +49,7 @@ jobs:
           retention-days: 30
 
   # ============================================================================
-  # BUILD RELEASE APK (unsigned) — only on main push or release
+  # BUILD RELEASE APK
   # ============================================================================
   build-release:
     name: Build Release APK
@@ -64,11 +66,13 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'temurin'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x ./gradlew
+      - name: Generate Gradle Wrapper
+        run: |
+          if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
+            echo "gradle-wrapper.jar not found, generating it..."
+            gradle wrapper --gradle-version 8.4
+          fi
+          chmod +x ./gradlew
 
       - name: Build Release APK
         run: ./gradlew assembleRelease --no-daemon
