@@ -10,6 +10,7 @@ import com.leapmotor.translator.data.local.entity.DictionaryEntryEntity
 import com.leapmotor.translator.domain.repository.TranslationRepository
 import com.leapmotor.translator.domain.repository.TranslationRepository.CacheStats
 import com.leapmotor.translator.domain.repository.TranslationRepository.ModelState
+import com.leapmotor.translator.translation.CommonTranslations
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -110,6 +111,10 @@ class TranslationRepositoryImpl @Inject constructor(
             // Load user dictionary into memory cache
             loadUserDictionaryToMemory()
             
+            // Preload common Leapmotor UI translations for instant display
+            // even before ML Kit model is downloaded
+            preloadCommonTranslations()
+            
             // Create translator options
             val options = TranslatorOptions.Builder()
                 .setSourceLanguage(sourceLang)
@@ -157,15 +162,31 @@ class TranslationRepositoryImpl @Inject constructor(
         Logger.d(TAG, "Loaded ${entries.size} entries to memory cache")
     }
     
+    private fun preloadCommonTranslations() {
+        var added = 0
+        for ((original, translated) in CommonTranslations.LEAPMOTOR_UI) {
+            if (!memoryCache.containsKey(original)) {
+                memoryCache[original] = translated
+                added++
+            }
+        }
+        Logger.i(TAG, "Preloaded $added common Leapmotor UI translations")
+    }
+    
     private suspend fun downloadModel(conditions: DownloadConditions): Boolean =
         suspendCancellableCoroutine { continuation ->
             translator?.downloadModelIfNeeded(conditions)
                 ?.addOnSuccessListener {
+                    Logger.i(TAG, "Model download SUCCESS")
                     if (continuation.isActive) continuation.resume(true)
                 }
-                ?.addOnFailureListener {
+                ?.addOnFailureListener { e ->
+                    Logger.e(TAG, "Model download FAILED: ${e.message}", e)
                     if (continuation.isActive) continuation.resume(false)
-                } ?: continuation.resume(false)
+                } ?: run {
+                    Logger.e(TAG, "Translator is null — cannot download model")
+                    if (continuation.isActive) continuation.resume(false)
+                }
         }
     
     // ========================================================================
@@ -190,7 +211,7 @@ class TranslationRepositoryImpl @Inject constructor(
         cacheMisses.incrementAndGet()
         
         if (!isReady) {
-            Logger.w(TAG, "Translation requested but model not ready")
+            Logger.w(TAG, "Translation requested but model not ready — returning original text (cache miss)")
             return@withContext Result.success(text)
         }
         

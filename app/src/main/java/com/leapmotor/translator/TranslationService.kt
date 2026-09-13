@@ -134,10 +134,22 @@ class TranslationService : AccessibilityService() {
         // Initialize overlay
         initializeOverlay()
         
-        // Initialize translation if needed
+        // Initialize translation with retry
         serviceScope.launch {
+            var retries = 0
+            while (!translationRepository.isReady && retries < 3) {
+                Logger.i(TAG, "Initializing translation model (attempt ${retries + 1}/3)")
+                val result = translationRepository.initialize()
+                if (result.isSuccess) {
+                    Logger.i(TAG, "Translation model ready!")
+                    break
+                }
+                retries++
+                Logger.w(TAG, "Translation init failed, retrying in 2s...")
+                kotlinx.coroutines.delay(2000)
+            }
             if (!translationRepository.isReady) {
-                translationRepository.initialize()
+                Logger.e(TAG, "Translation model failed after 3 attempts — using cached translations only")
             }
         }
     }

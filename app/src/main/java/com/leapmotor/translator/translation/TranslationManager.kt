@@ -126,6 +126,9 @@ class TranslationManager {
         isDownloading = true
         downloadState = DownloadState.DOWNLOADING
         
+        // Preload common translations BEFORE model download
+        preloadCommonUI()
+        
         try {
             // Configure translator: Chinese -> Russian
             val options = TranslatorOptions.Builder()
@@ -369,6 +372,17 @@ class TranslationManager {
     /**
      * Release resources.
      */
+    private fun preloadCommonUI() {
+        var added = 0
+        for ((original, translated) in CommonTranslations.LEAPMOTOR_UI) {
+            if (!translationCache.containsKey(original)) {
+                translationCache[original] = translated
+                added++
+            }
+        }
+        android.util.Log.i(TAG, "Preloaded $added common Leapmotor UI translations")
+    }
+    
     fun release() {
         translator?.close()
         translator = null
