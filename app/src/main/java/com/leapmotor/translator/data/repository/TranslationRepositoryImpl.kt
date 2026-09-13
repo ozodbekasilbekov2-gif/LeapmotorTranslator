@@ -174,8 +174,8 @@ class TranslationRepositoryImpl @Inject constructor(
         }
         
         // Also preload Russian→English if configured
-        val sourceLangCode = sourceLang.code
-        val targetLangCode = targetLang.code
+        val sourceLangCode = sourceLang.toString()
+        val targetLangCode = targetLang.toString()
         if (sourceLangCode == "ru" && targetLangCode == "en") {
             for ((original, translated) in CommonTranslations.RU_TO_EN) {
                 if (!memoryCache.containsKey(original)) {
