@@ -10,10 +10,15 @@ on:
 env:
   JAVA_VERSION: '17'
 
+permissions:
+  contents: write
+
 jobs:
   build-debug:
     name: Build Debug APK
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code
@@ -55,18 +60,16 @@ jobs:
           name: Debug Build (latest)
           body: |
             Auto-built debug APK from commit ${{ github.sha }}
-            
-            Built on: ${{ github.run_id }}
           files: app/build/outputs/apk/debug/app-debug.apk
           prerelease: true
           make_latest: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-release:
     name: Build Release APK
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code
@@ -107,10 +110,6 @@ jobs:
           name: Release Build v3.0.0
           body: |
             Auto-built release APK from commit ${{ github.sha }}
-            
-            Built on: ${{ github.run_id }}
           files: app/build/outputs/apk/release/app-release-unsigned.apk
           prerelease: false
           make_latest: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
