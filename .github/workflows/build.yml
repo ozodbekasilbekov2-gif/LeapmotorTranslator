@@ -13,9 +13,6 @@ env:
   JAVA_VERSION: '17'
 
 jobs:
-  # ============================================================================
-  # BUILD DEBUG APK
-  # ============================================================================
   build-debug:
     name: Build Debug APK
     runs-on: ubuntu-latest
@@ -30,11 +27,16 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'temurin'
 
-      - name: Generate Gradle Wrapper
+      - name: Setup Gradle 8.4
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.4'
+
+      - name: Generate Gradle Wrapper if missing
         run: |
           if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
-            echo "gradle-wrapper.jar not found, generating it..."
-            gradle wrapper --gradle-version 8.4
+            echo "gradle-wrapper.jar not found, generating with Gradle 8.4..."
+            gradle wrapper --gradle-version 8.4 --distribution-type bin
           fi
           chmod +x ./gradlew
 
@@ -48,9 +50,6 @@ jobs:
           path: app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
 
-  # ============================================================================
-  # BUILD RELEASE APK
-  # ============================================================================
   build-release:
     name: Build Release APK
     runs-on: ubuntu-latest
@@ -66,11 +65,16 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'temurin'
 
-      - name: Generate Gradle Wrapper
+      - name: Setup Gradle 8.4
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.4'
+
+      - name: Generate Gradle Wrapper if missing
         run: |
           if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
-            echo "gradle-wrapper.jar not found, generating it..."
-            gradle wrapper --gradle-version 8.4
+            echo "gradle-wrapper.jar not found, generating with Gradle 8.4..."
+            gradle wrapper --gradle-version 8.4 --distribution-type bin
           fi
           chmod +x ./gradlew
 
@@ -84,9 +88,6 @@ jobs:
           path: app/build/outputs/apk/release/app-release-unsigned.apk
           retention-days: 30
 
-  # ============================================================================
-  # UPLOAD TO GITHUB RELEASE
-  # ============================================================================
   upload-release:
     name: Upload to Release
     runs-on: ubuntu-latest
