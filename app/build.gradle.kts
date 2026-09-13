@@ -40,7 +40,7 @@ android {
             // CI provides these env vars; fallback to debug key for local builds
             val keystoreFile = System.getenv("KEYSTORE_FILE")
             if (keystoreFile != null) {
-                storeFile = file(keystoreFile)
+                storeFile = rootProject.file(keystoreFile)
                 storePassword = System.getenv("KEYSTORE_PASSWORD")
                 keyAlias = System.getenv("KEY_ALIAS")
                 keyPassword = System.getenv("KEY_PASSWORD")
