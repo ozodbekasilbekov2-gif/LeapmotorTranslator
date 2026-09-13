@@ -164,13 +164,28 @@ class TranslationRepositoryImpl @Inject constructor(
     
     private fun preloadCommonTranslations() {
         var added = 0
+        
+        // Always preload Chinese→Russian (Leapmotor UI)
         for ((original, translated) in CommonTranslations.LEAPMOTOR_UI) {
             if (!memoryCache.containsKey(original)) {
                 memoryCache[original] = translated
                 added++
             }
         }
-        Logger.i(TAG, "Preloaded $added common Leapmotor UI translations")
+        
+        // Also preload Russian→English if configured
+        val sourceLangCode = sourceLang.code
+        val targetLangCode = targetLang.code
+        if (sourceLangCode == "ru" && targetLangCode == "en") {
+            for ((original, translated) in CommonTranslations.RU_TO_EN) {
+                if (!memoryCache.containsKey(original)) {
+                    memoryCache[original] = translated
+                    added++
+                }
+            }
+        }
+        
+        Logger.i(TAG, "Preloaded $added common translations ($sourceLangCode -> $targetLangCode)")
     }
     
     private suspend fun downloadModel(conditions: DownloadConditions): Boolean =

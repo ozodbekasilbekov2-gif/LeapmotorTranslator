@@ -271,4 +271,127 @@ object CommonTranslations {
      * Get translation or null.
      */
     fun get(chinese: String): String? = LEAPMOTOR_UI[chinese]
+
+    
+    /**
+     * Common Russian → English translations.
+     * Used when source language is Russian and target is English.
+     */
+    val RU_TO_EN: Map<String, String> = mapOf(
+        // Navigation
+        "Навигация" to "Navigation",
+        "Карта" to "Map",
+        "Пункт назначения" to "Destination",
+        "Маршрут" to "Route",
+        "Время прибытия" to "Arrival time",
+        "Оставшееся расстояние" to "Remaining distance",
+        "Оставшееся время" to "Remaining time",
+        "Начать навигацию" to "Start navigation",
+        "Завершить навигацию" to "End navigation",
+        "Перестроить маршрут" to "Recalculate route",
+        "Избегать пробки" to "Avoid traffic",
+        "Кратчайший маршрут" to "Shortest route",
+        "Платная дорога" to "Toll road",
+        "Зона обслуживания" to "Service area",
+        "Зарядная станция" to "Charging station",
+        
+        // Climate
+        "Климат" to "Climate",
+        "Температура" to "Temperature",
+        "Кондиционер" to "Air conditioner",
+        "Отопление" to "Heating",
+        "Вентиляция" to "Ventilation",
+        "Обдув стекла" to "Defrost",
+        "Рециркуляция" to "Recirculation",
+        "Авто" to "Auto",
+        "Включить" to "On",
+        "Выключить" to "Off",
+        
+        // Media
+        "Музыка" to "Music",
+        "Радио" to "Radio",
+        "Плейлист" to "Playlist",
+        "Воспроизвести" to "Play",
+        "Пауза" to "Pause",
+        "Следующий" to "Next",
+        "Предыдущий" to "Previous",
+        "Громкость" to "Volume",
+        "Bluetooth" to "Bluetooth",
+        "USB" to "USB",
+        
+        // Vehicle Settings
+        "Настройки" to "Settings",
+        "Язык" to "Language",
+        "Время" to "Time",
+        "Дата" to "Date",
+        "Единицы" to "Units",
+        "Ярость" to "Brightness",
+        "Звук" to "Sound",
+        "Обновление" to "Update",
+        "Сброс" to "Reset",
+        "Пароль" to "Password",
+        "Безопасность" to "Security",
+        
+        // Battery/Charging
+        "Батарея" to "Battery",
+        "Зарядка" to "Charging",
+        "Заряжается" to "Charging",
+        "Остаток заряда" to "Remaining charge",
+        "Запас хода" to "Range",
+        "Быстрая зарядка" to "Fast charging",
+        "Медленная зарядка" to "Slow charging",
+        "Время зарядки" to "Charging time",
+        "Энергопотребление" to "Energy consumption",
+        
+        // Parking/Camera
+        "Парковка" to "Parking",
+        "Камера заднего вида" to "Rear camera",
+        "Камера 360" to "360 camera",
+        "Обзор" to "Overview",
+        "Парковочный ассистент" to "Parking assist",
+        "Датчики" to "Sensors",
+        
+        // ADAS/Safety
+        "Круиз-контроль" to "Cruise control",
+        "Адаптивный круиз" to "Adaptive cruise",
+        "Удержание полосы" to "Lane keeping",
+        "Автоторможение" to "Auto braking",
+        "Сигнализация" to "Alarm",
+        "Тревога" to "Alert",
+        "Предупреждение" to "Warning",
+        "Внимание" to "Attention",
+        
+        // General
+        "Да" to "Yes",
+        "Нет" to "No",
+        "ОК" to "OK",
+        "Отмена" to "Cancel",
+        "Подтвердить" to "Confirm",
+        "Назад" to "Back",
+        "Вперед" to "Forward",
+        "Вверх" to "Up",
+        "Вниз" to "Down",
+        "Лево" to "Left",
+        "Право" to "Right",
+        "Стоп" to "Stop",
+        "Пуск" to "Start",
+        "Открыть" to "Open",
+        "Закрыть" to "Close",
+        "Сохранить" to "Save",
+        "Удалить" to "Delete",
+        "Редактировать" to "Edit",
+        "Добавить" to "Add",
+        "Поиск" to "Search",
+        "Фильтр" to "Filter",
+        "Сортировка" to "Sort",
+        "Телефон" to "Phone",
+        "Контакты" to "Contacts",
+        "Сообщения" to "Messages",
+        "Уведомления" to "Notifications",
+        "Звонок" to "Call",
+        "Ответить" to "Answer",
+        "Отклонить" to "Reject",
+        "Завершить вызов" to "End call"
+    )
+
 }

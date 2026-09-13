@@ -374,13 +374,21 @@ class TranslationManager {
      */
     private fun preloadCommonUI() {
         var added = 0
+        // Always preload Chinese→Russian (Leapmotor UI)
         for ((original, translated) in CommonTranslations.LEAPMOTOR_UI) {
             if (!translationCache.containsKey(original)) {
                 translationCache[original] = translated
                 added++
             }
         }
-        android.util.Log.i(TAG, "Preloaded $added common Leapmotor UI translations")
+        // Also preload Russian→English
+        for ((original, translated) in CommonTranslations.RU_TO_EN) {
+            if (!translationCache.containsKey(original)) {
+                translationCache[original] = translated
+                added++
+            }
+        }
+        android.util.Log.i(TAG, "Preloaded $added common translations (zh->ru + ru->en)")
     }
     
     fun release() {

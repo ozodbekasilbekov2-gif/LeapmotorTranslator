@@ -29,6 +29,35 @@ fun String.containsChinese(): Boolean = any { char ->
 }
 
 /**
+ * Check if string contains Cyrillic (Russian) characters.
+ */
+fun String.containsCyrillic(): Boolean = any { char ->
+    val code = char.code
+    code in 0x0400..0x04FF ||  // Cyrillic
+    code in 0x0500..0x052F     // Cyrillic Supplement
+}
+
+/**
+ * Check if string contains Latin characters.
+ */
+fun String.containsLatin(): Boolean = any { char ->
+    val code = char.code
+    code in 0x0041..0x005A ||  // A-Z
+    code in 0x0061..0x007A     // a-z
+}
+
+/**
+ * Check if string contains characters of the specified language.
+ * @param langCode Language code: "zh" (Chinese), "ru" (Russian/Cyrillic), "en" (Latin)
+ */
+fun String.containsLanguage(langCode: String): Boolean = when (langCode) {
+    "zh" -> containsChinese()
+    "ru" -> containsCyrillic()
+    "en" -> containsLatin()
+    else -> true // Unknown language — process all text
+}
+
+/**
  * Truncate string with ellipsis if exceeds max length.
  */
 fun String.truncate(maxLength: Int, ellipsis: String = "…"): String {

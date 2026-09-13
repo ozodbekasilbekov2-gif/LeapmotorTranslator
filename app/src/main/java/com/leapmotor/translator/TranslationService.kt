@@ -16,6 +16,8 @@ import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import com.leapmotor.translator.core.Logger
 import com.leapmotor.translator.core.containsChinese
+import com.leapmotor.translator.core.containsCyrillic
+import com.leapmotor.translator.core.containsLatin
 import com.leapmotor.translator.domain.repository.TranslationRepository
 import com.leapmotor.translator.renderer.TextOverlay
 import dagger.hilt.android.AndroidEntryPoint
@@ -271,7 +273,7 @@ class TranslationService : AccessibilityService() {
         // Get text content
         val text = node.text?.toString()?.trim()
         
-        if (!text.isNullOrEmpty() && text.containsChinese()) {
+        if (!text.isNullOrEmpty() && shouldTranslate(text)) {
             val rect = Rect()
             node.getBoundsInScreen(rect)
             val bounds = RectF(rect)
@@ -294,6 +296,25 @@ class TranslationService : AccessibilityService() {
             } finally {
                 child.recycle()
             }
+        }
+    }
+    
+    /**
+     * Check if text should be translated based on configured source language.
+     * - Chinese source: translate text containing Chinese characters
+     * - Russian source: translate text containing Cyrillic characters
+     * - English source: translate text containing Latin characters
+     * - Other: translate all non-empty text
+     */
+    private fun shouldTranslate(text: String): Boolean {
+        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        val sourceLang = prefs.getString("source_lang", "zh") ?: "zh"
+        
+        return when (sourceLang) {
+            "zh" -> text.containsChinese()
+            "ru" -> text.containsCyrillic()
+            "en" -> text.containsLatin()
+            else -> text.isNotBlank()
         }
     }
     
