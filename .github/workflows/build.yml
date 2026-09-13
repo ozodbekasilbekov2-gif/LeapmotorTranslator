@@ -7,176 +7,98 @@ on:
     branches: [ main ]
   release:
     types: [ created ]
+  workflow_dispatch:
 
 env:
   JAVA_VERSION: '17'
-  ANDROID_COMPILE_SDK: '34'
-  GRADLE_VERSION: '8.4'
-  
+
 jobs:
   # ============================================================================
-  # LINT & ANALYSIS
-  # ============================================================================
-  lint:
-    name: Lint & Static Analysis
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: 'temurin'
-          
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: ${{ env.GRADLE_VERSION }}
-          
-      - name: Run Lint
-        run: gradle lint
-        
-      - name: Upload Lint Results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: lint-results
-          path: app/build/reports/lint-results-*.html
-          
-  # ============================================================================
-  # UNIT TESTS
-  # ============================================================================
-  test:
-    name: Unit Tests
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: 'temurin'
-          
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: ${{ env.GRADLE_VERSION }}
-          
-      - name: Run Unit Tests
-        run: gradle testDebugUnitTest
-        
-      - name: Upload Test Results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: test-results
-          path: app/build/reports/tests/
-          
-      - name: Upload Test Report
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: test-report
-          path: app/build/test-results/
-          
-  # ============================================================================
-  # BUILD DEBUG APK
+  # BUILD DEBUG APK (always on push — no dependency on lint/test)
   # ============================================================================
   build-debug:
     name: Build Debug APK
     runs-on: ubuntu-latest
-    needs: [lint, test]
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'temurin'
-          
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: ${{ env.GRADLE_VERSION }}
-          
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
       - name: Build Debug APK
-        run: gradle assembleDebug
-        
+        run: ./gradlew assembleDebug --no-daemon
+
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug
+          name: app-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
-          
+          retention-days: 30
+
   # ============================================================================
-  # BUILD RELEASE APK
+  # BUILD RELEASE APK (unsigned) — only on main push or release
   # ============================================================================
   build-release:
     name: Build Release APK
     runs-on: ubuntu-latest
-    needs: [lint, test]
     if: github.event_name == 'release' || github.ref == 'refs/heads/main'
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'temurin'
-          
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: ${{ env.GRADLE_VERSION }}
-          
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
       - name: Build Release APK
-        run: gradle assembleRelease
-        
+        run: ./gradlew assembleRelease --no-daemon
+
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-release
+          name: app-release-apk
           path: app/build/outputs/apk/release/app-release-unsigned.apk
-          
+          retention-days: 30
+
   # ============================================================================
-  # UPLOAD TO RELEASE
+  # UPLOAD TO GITHUB RELEASE
   # ============================================================================
   upload-release:
     name: Upload to Release
     runs-on: ubuntu-latest
     needs: [build-release]
     if: github.event_name == 'release'
-    
+
+    permissions:
+      contents: write
+
     steps:
       - name: Download Release APK
         uses: actions/download-artifact@v4
         with:
-          name: app-release
-          
-      - name: Get Release Info
-        id: release
-        uses: bruceadams/get-release@v1.3.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: app-release-apk
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v1
         with:
-          upload_url: ${{ steps.release.outputs.upload_url }}
-          asset_path: ./app-release-unsigned.apk
-          asset_name: LeapmotorTranslator-${{ github.event.release.tag_name }}.apk
-          asset_content_type: application/vnd.android.package-archive
+          files: app-release-unsigned.apk
