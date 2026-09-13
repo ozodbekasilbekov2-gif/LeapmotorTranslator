@@ -93,14 +93,31 @@ jobs:
           fi
           chmod +x ./gradlew
 
-      - name: Build Release APK
+      - name: Generate Release Keystore
+        run: |
+          keytool -genkeypair \
+            -alias release-key \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -keystore app/release-keystore.jks \
+            -storepass leapmotor123 \
+            -keypass leapmotor123 \
+            -dname "CN=LeapmotorTranslator, OU=Mobile, O=Leapmotor, L=Tashkent, C=UZ"
+
+      - name: Build & Sign Release APK
         run: ./gradlew assembleRelease --no-daemon
+        env:
+          KEYSTORE_FILE: app/release-keystore.jks
+          KEYSTORE_PASSWORD: leapmotor123
+          KEY_ALIAS: release-key
+          KEY_PASSWORD: leapmotor123
 
       - name: Upload Release APK (artifact)
         uses: actions/upload-artifact@v4
         with:
           name: app-release-apk
-          path: app/build/outputs/apk/release/app-release-unsigned.apk
+          path: app/build/outputs/apk/release/app-release.apk
           retention-days: 30
 
       - name: Publish Release APK as GitHub Release
@@ -109,7 +126,7 @@ jobs:
           tag_name: release-latest
           name: Release Build v3.0.0
           body: |
-            Auto-built release APK from commit ${{ github.sha }}
-          files: app/build/outputs/apk/release/app-release-unsigned.apk
+            Auto-built SIGNED release APK from commit ${{ github.sha }}
+          files: app/build/outputs/apk/release/app-release.apk
           prerelease: false
           make_latest: true
